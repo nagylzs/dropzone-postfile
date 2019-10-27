@@ -1,0 +1,191 @@
+object frmMain: TfrmMain
+  Left = 638
+  Height = 287
+  Top = 579
+  Width = 1056
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsDialog
+  Caption = 'Dropzone-Postfile'
+  ClientHeight = 287
+  ClientWidth = 1056
+  DesignTimePPI = 144
+  OnCreate = FormCreate
+  OnShow = FormShow
+  Position = poScreenCenter
+  LCLVersion = '2.0.4.0'
+  object PageControl1: TPageControl
+    Left = 0
+    Height = 287
+    Top = 0
+    Width = 1056
+    ActivePage = tsBasic
+    Align = alClient
+    TabIndex = 0
+    TabOrder = 0
+    object tsBasic: TTabSheet
+      Caption = 'Basic settings'
+      ClientHeight = 249
+      ClientWidth = 1048
+      object lblURL: TLabel
+        Left = 32
+        Height = 25
+        Top = 8
+        Width = 31
+        Caption = 'URL'
+        ParentColor = False
+      end
+      object eURL: TEdit
+        Left = 32
+        Height = 33
+        Top = 40
+        Width = 840
+        TabOrder = 0
+      end
+      object lblProgress: TLabel
+        Left = 32
+        Height = 25
+        Top = 165
+        Width = 410
+        Caption = 'Press the "Start upload" button to upload your file...'
+        ParentColor = False
+      end
+      object progressBar: TProgressBar
+        Left = 24
+        Height = 30
+        Top = 197
+        Width = 854
+        Max = 10000
+        TabOrder = 1
+      end
+      object btnCancel: TButton
+        Left = 888
+        Height = 38
+        Top = 189
+        Width = 113
+        Caption = 'Cancel'
+        Enabled = False
+        OnClick = btnCancelClick
+        TabOrder = 2
+      end
+      object btnSelectFile: TButton
+        Left = 816
+        Height = 38
+        Top = 116
+        Width = 65
+        Caption = '...'
+        OnClick = btnSelectFileClick
+        TabOrder = 3
+      end
+      object eFileName: TEdit
+        Left = 32
+        Height = 33
+        Top = 120
+        Width = 776
+        OnChange = eFileNameChange
+        TabOrder = 4
+      end
+      object lblProgress1: TLabel
+        Left = 32
+        Height = 25
+        Top = 93
+        Width = 109
+        Caption = 'File to upload'
+        ParentColor = False
+      end
+      object btnStartUpload: TButton
+        Left = 888
+        Height = 38
+        Top = 115
+        Width = 113
+        Caption = 'Start upload'
+        OnClick = btnStartUploadClick
+        TabOrder = 5
+      end
+      object btnHelp: TButton
+        Left = 888
+        Height = 38
+        Top = 40
+        Width = 113
+        Caption = 'Help'
+        OnClick = btnHelpClick
+        TabOrder = 6
+        TabStop = False
+      end
+    end
+    object tsHeaders: TTabSheet
+      Caption = 'Headers'
+      ClientHeight = 249
+      ClientWidth = 1048
+      object Panel1: TPanel
+        Left = 0
+        Height = 56
+        Top = 0
+        Width = 1048
+        Align = alTop
+        ClientHeight = 56
+        ClientWidth = 1048
+        TabOrder = 0
+        object Button1: TButton
+          Left = 8
+          Height = 38
+          Top = 8
+          Width = 257
+          Caption = 'Load from file...'
+          OnClick = Button1Click
+          TabOrder = 0
+        end
+        object Label1: TLabel
+          Left = 274
+          Height = 25
+          Top = 12
+          Width = 608
+          Caption = 'Each header should appear on a new line, in the form of <NAME>=<VALUE>'
+          ParentColor = False
+        end
+      end
+      object mHeaders: TMemo
+        Left = 0
+        Height = 193
+        Top = 56
+        Width = 1048
+        Align = alClient
+        Lines.Strings = (
+          'User-Agent=PostFile'
+        )
+        ScrollBars = ssAutoBoth
+        TabOrder = 1
+        WordWrap = False
+      end
+    end
+  end
+  object IdHTTP: TIdHTTP
+    ProxyParams.BasicAuthentication = False
+    ProxyParams.ProxyPort = 0
+    Request.ContentLength = -1
+    Request.ContentRangeEnd = -1
+    Request.ContentRangeStart = -1
+    Request.ContentRangeInstanceLength = -1
+    Request.Date = 0
+    Request.Expires = 0
+    Request.LastModified = 0
+    Request.Accept = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+    Request.BasicAuthentication = False
+    Request.UserAgent = 'Mozilla/3.0 (compatible; Indy Library)'
+    Request.Ranges.Units = 'bytes'
+    Request.Ranges = <>
+    HTTPOptions = [hoForceEncodeParams]
+    left = 728
+    top = 144
+  end
+  object od: TOpenDialog
+    Filter = '*.*'
+    left = 672
+    top = 144
+  end
+  object Timer: TTimer
+    Interval = 100
+    OnTimer = TimerTimer
+    left = 624
+    top = 48
+  end
+end
