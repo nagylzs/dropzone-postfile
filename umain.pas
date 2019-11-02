@@ -5,8 +5,8 @@ unit uMain;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ComCtrls, ExtCtrls, IdHTTP, DateUtils, ProgressFileStream, IdComponent;
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ComCtrls,
+  ExtCtrls, IdHTTP, IdSSLOpenSSL, DateUtils, ProgressFileStream, IdComponent;
 
 type
 
@@ -21,6 +21,7 @@ type
     eFileName: TEdit;
     eURL: TEdit;
     IdHTTP: TIdHTTP;
+    ioSocketOpenSSL: TIdSSLIOHandlerSocketOpenSSL;
     Label1: TLabel;
     lblProgress: TLabel;
     lblProgress1: TLabel;
@@ -30,6 +31,8 @@ type
     PageControl1: TPageControl;
     Panel1: TPanel;
     progressBar: TProgressBar;
+    rgTLS: TRadioGroup;
+    tsTLS: TTabSheet;
     Timer: TTimer;
     tsBasic: TTabSheet;
     tsHeaders: TTabSheet;
@@ -41,6 +44,7 @@ type
     procedure eFileNameChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure rgTLSClick(Sender: TObject);
     procedure TimerTimer(Sender: TObject);
   private
     FStarted: TDateTime;
@@ -90,6 +94,15 @@ begin
   begin
     ShowMessage('Invalid filename');
     exit;
+  end;
+
+  with ioSocketOpenSSL.SSLOptions do
+  begin
+    case rgTLS.ItemIndex of
+      0: SSLVersions:= [sslvTLSv1_2];
+      1: SSLVersions:= [sslvTLSv1_2, sslvTLSv1_1];
+      2: SSLVersions:= [sslvTLSv1_2, sslvTLSv1_1, sslvTLSv1 ];
+    end;
   end;
 
   try
@@ -209,6 +222,10 @@ procedure TfrmMain.FormShow(Sender: TObject);
 begin
 end;
 
+procedure TfrmMain.rgTLSClick(Sender: TObject);
+begin
+end;
+
 procedure TfrmMain.TimerTimer(Sender: TObject);
 begin
   if Visible then
@@ -237,6 +254,16 @@ begin
     begin
       mHeaders.Lines.LoadFromFile(Application.GetOptionValue('d', 'headers'));
     end;
+    if Application.HasOption('allow-tls-1.0') then
+    begin
+      rgTLS.ItemIndex:= 2;
+    end else if Application.HasOption('allow-tls-1.1') then
+    begin
+      rgTLS.ItemIndex:= 1;
+    end else begin
+      rgTLS.ItemIndex:= 0;
+    end;
+
     if Application.HasOption('auto-start') then
     begin
       btnStartUpload.Click;

@@ -9,7 +9,7 @@ object frmHelp: TfrmHelp
   ClientWidth = 838
   DesignTimePPI = 144
   Position = poScreenCenter
-  LCLVersion = '2.0.4.0'
+  LCLVersion = '2.0.6.0'
   object Panel1: TPanel
     Left = 0
     Height = 75
@@ -68,6 +68,14 @@ object frmHelp: TfrmHelp
       '--title TITLE'
       ''
       '   Set the title of the main window'
+      ''
+      '--allow-tls-1.1'
+      ''
+      '   Allow TLSv1.1 (only TLS 1.2 is enabled by default).'
+      ''
+      '--allow-tls-1.0'
+      ''
+      '   Allow TLSv1.0 (only TLS 1.2 is enabled by default).'
     )
     ItemHeight = 15
     ParentFont = False
