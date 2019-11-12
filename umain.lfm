@@ -1,13 +1,13 @@
 object frmMain: TfrmMain
   Left = 638
-  Height = 287
+  Height = 341
   Top = 579
-  Width = 1056
+  Width = 1051
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
   Caption = 'Dropzone-Postfile'
-  ClientHeight = 287
-  ClientWidth = 1056
+  ClientHeight = 341
+  ClientWidth = 1051
   DesignTimePPI = 144
   OnCreate = FormCreate
   OnShow = FormShow
@@ -15,17 +15,17 @@ object frmMain: TfrmMain
   LCLVersion = '2.0.6.0'
   object PageControl1: TPageControl
     Left = 0
-    Height = 287
+    Height = 341
     Top = 0
-    Width = 1056
+    Width = 1051
     ActivePage = tsBasic
     Align = alClient
     TabIndex = 0
     TabOrder = 0
     object tsBasic: TTabSheet
       Caption = 'Basic settings'
-      ClientHeight = 249
-      ClientWidth = 1048
+      ClientHeight = 303
+      ClientWidth = 1043
       object lblURL: TLabel
         Left = 32
         Height = 25
@@ -41,18 +41,10 @@ object frmMain: TfrmMain
         Width = 840
         TabOrder = 0
       end
-      object lblProgress: TLabel
-        Left = 32
-        Height = 25
-        Top = 165
-        Width = 410
-        Caption = 'Press the "Start upload" button to upload your file...'
-        ParentColor = False
-      end
       object progressBar: TProgressBar
-        Left = 24
-        Height = 30
-        Top = 197
+        Left = 27
+        Height = 62
+        Top = 224
         Width = 854
         Max = 10000
         TabOrder = 1
@@ -60,7 +52,7 @@ object frmMain: TfrmMain
       object btnCancel: TButton
         Left = 888
         Height = 38
-        Top = 189
+        Top = 248
         Width = 113
         Caption = 'Cancel'
         Enabled = False
@@ -94,7 +86,7 @@ object frmMain: TfrmMain
       end
       object btnStartUpload: TButton
         Left = 888
-        Height = 38
+        Height = 118
         Top = 115
         Width = 113
         Caption = 'Start upload'
@@ -110,6 +102,30 @@ object frmMain: TfrmMain
         OnClick = btnHelpClick
         TabOrder = 6
         TabStop = False
+      end
+      object lblUploaded: TLabel
+        Left = 32
+        Height = 25
+        Top = 192
+        Width = 400
+        AutoSize = False
+        ParentColor = False
+      end
+      object lblRemaining: TLabel
+        Left = 456
+        Height = 25
+        Top = 192
+        Width = 400
+        AutoSize = False
+        ParentColor = False
+      end
+      object lblProgress: TLabel
+        Left = 32
+        Height = 25
+        Top = 160
+        Width = 410
+        Caption = 'Press the "Start upload" button to upload your file...'
+        ParentColor = False
       end
     end
     object tsHeaders: TTabSheet
@@ -188,47 +204,20 @@ object frmMain: TfrmMain
       end
     end
   end
-  object IdHTTP: TIdHTTP
-    IOHandler = ioSocketOpenSSL
-    ProxyParams.BasicAuthentication = False
-    ProxyParams.ProxyPort = 0
-    Request.ContentLength = -1
-    Request.ContentRangeEnd = -1
-    Request.ContentRangeStart = -1
-    Request.ContentRangeInstanceLength = -1
-    Request.Date = 0
-    Request.Expires = 0
-    Request.LastModified = 0
-    Request.Accept = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
-    Request.BasicAuthentication = False
-    Request.UserAgent = 'Mozilla/3.0 (compatible; Indy Library)'
-    Request.Ranges.Units = 'bytes'
-    Request.Ranges = <>
-    HTTPOptions = [hoForceEncodeParams]
-    left = 584
-    top = 136
-  end
   object od: TOpenDialog
     Filter = '*.*'
     left = 504
     top = 136
   end
-  object Timer: TTimer
+  object tmStarted: TTimer
     Interval = 100
-    OnTimer = TimerTimer
+    OnTimer = tmStartedTimer
     left = 624
     top = 48
   end
-  object ioSocketOpenSSL: TIdSSLIOHandlerSocketOpenSSL
-    MaxLineAction = maException
-    Port = 0
-    DefaultPort = 0
-    SSLOptions.Method = sslvSSLv23
-    SSLOptions.SSLVersions = [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2]
-    SSLOptions.Mode = sslmUnassigned
-    SSLOptions.VerifyMode = []
-    SSLOptions.VerifyDepth = 0
-    left = 680
-    top = 136
+  object tmProgress: TTimer
+    OnTimer = tmProgressTimer
+    left = 776
+    top = 48
   end
 end

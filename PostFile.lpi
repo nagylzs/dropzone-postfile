@@ -39,7 +39,7 @@
         <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="5">
+    <Units Count="6">
       <Unit0>
         <Filename Value="PostFile.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -70,6 +70,11 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="uHelp"/>
       </Unit4>
+      <Unit5>
+        <Filename Value="streamuploader.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StreamUploader"/>
+      </Unit5>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -89,6 +94,9 @@
         </Win32>
       </Options>
     </Linking>
+    <Other>
+      <CompilerPath Value="C:\lazarus\fpc\3.0.4\bin\x86_64-win64\fpc.exe"/>
+    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="3">

@@ -6,7 +6,8 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ComCtrls,
-  ExtCtrls, IdHTTP, IdSSLOpenSSL, DateUtils, ProgressFileStream, IdComponent;
+  ExtCtrls, IdHTTP, IdSSLOpenSSL, DateUtils, IdComponent,
+  StreamUploader;
 
 type
 
@@ -20,11 +21,11 @@ type
     btnHelp: TButton;
     eFileName: TEdit;
     eURL: TEdit;
-    IdHTTP: TIdHTTP;
-    ioSocketOpenSSL: TIdSSLIOHandlerSocketOpenSSL;
     Label1: TLabel;
     lblProgress: TLabel;
     lblProgress1: TLabel;
+    lblUploaded: TLabel;
+    lblRemaining: TLabel;
     lblURL: TLabel;
     mHeaders: TMemo;
     od: TOpenDialog;
@@ -32,8 +33,9 @@ type
     Panel1: TPanel;
     progressBar: TProgressBar;
     rgTLS: TRadioGroup;
+    tmProgress: TTimer;
     tsTLS: TTabSheet;
-    Timer: TTimer;
+    tmStarted: TTimer;
     tsBasic: TTabSheet;
     tsHeaders: TTabSheet;
     procedure btnCancelClick(Sender: TObject);
@@ -45,22 +47,17 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure rgTLSClick(Sender: TObject);
-    procedure TimerTimer(Sender: TObject);
+    procedure tmProgressTimer(Sender: TObject);
+    procedure tmStartedTimer(Sender: TObject);
   private
-    FStarted: TDateTime;
-    FStartedYear: word;
-    FStartedDoy: word;
-    FLastUpdated: TDateTime;
-    FLastUploaded: longint;
-    FTotalSize: longint;
-    FCancel: boolean;
+    FStreamUploader: TStreamUploader;
 
-    procedure OnReadProgress(Sender: TProgressFileStream; Size: longint);
-    function FormatSize(ASize: double): string;
 
     procedure SetUploading(const AValue: boolean);
 
   public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
 
   end;
 
@@ -70,19 +67,13 @@ var
 implementation
 
 uses
-  IdMultipartFormData, CustomMultipartDataStream, uHelp;
+  uHelp;
 
 {$R *.lfm}
 
 { TfrmMain }
 
 procedure TfrmMain.btnStartUploadClick(Sender: TObject);
-var
-  response: TStringStream;
-  form: TCustomMultipartDataStream;
-  src: TProgressFileStream;
-  totalElapsed: TDateTime;
-  avgSpeed: double;
 begin
   if Trim(eURL.Text) = '' then
   begin
@@ -96,85 +87,32 @@ begin
     exit;
   end;
 
-  with ioSocketOpenSSL.SSLOptions do
+  if Assigned(FStreamUploader) then
   begin
-    case rgTLS.ItemIndex of
-      0: SSLVersions:= [sslvTLSv1_2];
-      1: SSLVersions:= [sslvTLSv1_2, sslvTLSv1_1];
-      2: SSLVersions:= [sslvTLSv1_2, sslvTLSv1_1, sslvTLSv1 ];
+    if FStreamUploader.Finished then
+    begin
+      FreeAndNil(FStreamUploader);
+    end
+    else
+    begin
+      ShowMessage('Previous upload is still running.');
+      exit;
     end;
   end;
 
   try
-    src := TProgressFileStream.Create(eFileName.Text);
-    try
-      FTotalSize := src.Size;
-      FLastUpdated := 0;
-      FLastUploaded := 0;
-      FStarted := Now;
-      DecodeDateDay(FStarted, FStartedYear, FStartedDoy);
-      FCancel := False;
-      SetUploading(True);
 
-      progressBar.Max := FTotalSize;
-      progressBar.Position := 0;
-      lblProgress.Font.Color := clDefault;
-      src.OnReadProgress := @OnReadProgress;
-      response := TStringStream.Create('');
-      try
-        try
-          form := TCustomMultipartDataStream.Create;
-          try
-            form.AddFileStream('file', eFileName.Text, src);
-            with IdHttp.Request.CustomHeaders do
-            begin
-              Clear;
-              AddStrings(mHeaders.Lines);
-            end;
-            IdHTTP.Post(eURL.Text, form, response);
-          finally
-            form.Free;
-          end;
-        except
-          on e: EAbort do
-          begin
-            ShowMessage('User aborted upload.');
-            FCancel:= true;
-          end;
-          on e :Exception do
-          begin
-            lblProgress.Caption:= 'UPLOAD ERROR!';
-            lblProgress.Font.Color:= clRed;
-            ShowMessage(e.Message);
-            FCancel:= true;
-          end;
-        end;
-      finally
-        response.Free;
+    FStreamUploader := TStreamUploader.Create(eURL.Text, eFileName.Text);
+    with FStreamUploader.IOHandler.SSLOptions do
+    begin
+      case rgTLS.ItemIndex of
+        0: SSLVersions := [sslvTLSv1_2];
+        1: SSLVersions := [sslvTLSv1_2, sslvTLSv1_1];
+        2: SSLVersions := [sslvTLSv1_2, sslvTLSv1_1, sslvTLSv1];
       end;
-
-    finally
-      src.Free;
     end;
-
-    totalElapsed := Now - FStarted;
-    avgSpeed := progressBar.Max / totalElapsed * OneSecond;
-
-    if FCancel then
-    begin
-      lblProgress.Font.Color := clRed;
-      lblProgress.Caption := 'ABORTED! ' + FormatSize(progressBar.Max) +
-        ' in ' + TimeToStr(totalElapsed) + ' Avg. speed= ' + FormatSize(avgSpeed) + '/s';
-    end
-    else
-    begin
-      lblProgress.Font.Color := clGreen;
-      progressBar.Position := progressBar.Max;
-      lblProgress.Caption := 'Uploaded ' + FormatSize(progressBar.Max) +
-        ' in ' + TimeToStr(totalElapsed) + ' Avg. speed= ' + FormatSize(avgSpeed) + '/s';
-    end;
-
-    SetUploading(False);
+    SetUploading(True);
+    FStreamUploader.Start;
 
   except
     on e: Exception do
@@ -197,10 +135,83 @@ begin
   lblProgress.Caption := 'Press the "Start upload" button to upload your file...';
 end;
 
+procedure TfrmMain.FormCreate(Sender: TObject);
+begin
+
+end;
+
+procedure TfrmMain.FormShow(Sender: TObject);
+begin
+
+end;
+
+procedure TfrmMain.rgTLSClick(Sender: TObject);
+begin
+
+end;
+
+procedure TfrmMain.tmProgressTimer(Sender: TObject);
+var
+  AvgSpeed: double;
+begin
+  if Assigned(FStreamUploader) then
+  begin
+    with FStreamUploader, Status do
+    begin
+      if Cancelled then
+      begin
+        lblProgress.Caption := 'Upload aborted.';
+        lblProgress.Font.Color := clRed;
+        SetUploading(False);
+        lblRemaining.Caption := '';
+      end
+      else if Finished then
+      begin
+        lblUploaded.Caption :=
+          ' Uploaded: ' + FormatSize(totalUploaded) + ' in ' + TimeToStr(totalElapsed);
+        lblRemaining.Caption := '';
+
+        if (TotalSize > 0) and (TotalElapsed > 0) then
+          AvgSpeed := TotalSize / (TotalElapsed / OneSecond)
+        else
+          AvgSpeed := -1;
+
+        lblProgress.Caption := 'Upload finished, avg speed =' + FormatSpeed(AvgSpeed);
+        lblProgress.Font.Color := clGreen;
+
+        SetUploading(False);
+      end
+      else
+      begin
+        lblProgress.Caption :=
+          FormatFloat('0.0 %', PercentDone) + ' Speed: ' +
+          FormatSpeed(BatchSpeed) + ' ETA: ' + FormatEta(Eta, Started);
+        lblProgress.Font.Color := clBlue;
+        lblUploaded.Caption :=
+          ' Uploaded: ' + FormatSize(totalUploaded) + ' in ' + TimeToStr(totalElapsed);
+        lblRemaining.Caption :=
+          ' Remaining: ' + FormatSize(Remaining) + ' in ' +
+          FormatRemainingTime(RemainingTime);
+      end;
+      progressBar.Position := Trunc(100 * PercentDone);
+    end;
+  end
+  else
+  begin
+    lblProgress.Caption := 'Press the "Start upload" button to upload your file...';
+    lblProgress.Font.Color := clGray;
+
+    lblUploaded.Caption := '';
+    lblRemaining.Caption := '';
+    progressBar.Position := 0;
+  end;
+end;
+
 procedure TfrmMain.btnCancelClick(Sender: TObject);
 begin
-  FCancel := True;
   btnCancel.Enabled := False;
+  if Assigned(FStreamUploader) then
+    FStreamUploader.Cancel;
 end;
 
 procedure TfrmMain.btnHelpClick(Sender: TObject);
@@ -214,23 +225,11 @@ begin
     eFileName.Text := od.FileName;
 end;
 
-procedure TfrmMain.FormCreate(Sender: TObject);
-begin
-end;
-
-procedure TfrmMain.FormShow(Sender: TObject);
-begin
-end;
-
-procedure TfrmMain.rgTLSClick(Sender: TObject);
-begin
-end;
-
-procedure TfrmMain.TimerTimer(Sender: TObject);
+procedure TfrmMain.tmStartedTimer(Sender: TObject);
 begin
   if Visible then
   begin
-    Timer.Enabled := False;
+    tmStarted.Enabled := False;
 
     if Application.HasOption('h', 'help') then
     begin
@@ -256,12 +255,15 @@ begin
     end;
     if Application.HasOption('allow-tls-1.0') then
     begin
-      rgTLS.ItemIndex:= 2;
-    end else if Application.HasOption('allow-tls-1.1') then
+      rgTLS.ItemIndex := 2;
+    end
+    else if Application.HasOption('allow-tls-1.1') then
     begin
-      rgTLS.ItemIndex:= 1;
-    end else begin
-      rgTLS.ItemIndex:= 0;
+      rgTLS.ItemIndex := 1;
+    end
+    else
+    begin
+      rgTLS.ItemIndex := 0;
     end;
 
     if Application.HasOption('auto-start') then
@@ -271,94 +273,7 @@ begin
   end;
 end;
 
-procedure TfrmMain.OnReadProgress(Sender: TProgressFileStream; Size: longint);
-var
-  totalElapsed: double;
-  totalUploaded: longint;
-  percent: double;
 
-  batchElapsed: double;
-  batchUploaded: double;
-  batchSpeed: double;
-  sBatchSpeed: string;
-
-  remaining: longint;
-  eta: TDateTime;
-  sEta: string;
-
-  year, doy: word;
-begin
-  if FCancel then
-    Abort;
-
-  batchElapsed := Now - FLastUpdated;
-  if batchElapsed > 100 * OneMillisecond then
-  begin
-    totalUploaded := Sender.Position;
-    batchUploaded := totalUploaded - FLastUploaded;
-    batchSpeed := batchUploaded / batchElapsed;
-
-    progressBar.Position := totalUploaded;
-    percent := 100.0 * totalUploaded / FTotalSize;
-
-    remaining := FTotalSize - totalUploaded;
-    if batchSpeed > 0 then
-    begin
-      sBatchSpeed := FormatSize(batchSpeed * OneSecond) + '/s';
-      eta := Now + remaining / batchSpeed;
-      DecodeDateDay(eta, year, doy);
-      if (year <> FStartedYear) or (doy <> FStartedDoy) then
-      begin
-        sEta := DateTimeToStr(eta);
-      end
-      else
-      begin
-        sEta := FormatDateTime('t', eta);
-      end;
-    end
-    else
-    begin
-      sBatchSpeed := 'Stalled';
-      sEta := 'N/A';
-    end;
-
-    totalElapsed := Now - FStarted;
-
-    lblProgress.Caption :=
-      FormatFloat('0.0 %', percent) + ' Uploaded: ' + FormatSize(totalUploaded) +
-      ' Remaining: ' + FormatSize(remaining) + ' Speed: ' + sBatchSpeed +
-      ' Elapsed: ' + TimeToStr(totalElapsed) + ' ETA: ' + sEta;
-    Application.ProcessMessages;
-
-    FLastUpdated := Now;
-    FLastUploaded := totalUploaded;
-
-    if Application.HasOption('auto-close') then
-    begin
-      Close;
-    end;
-  end;
-end;
-
-function TfrmMain.FormatSize(ASize: double): string;
-begin
-  if (ASize > 1024 * 1024 * 1024) then
-  begin
-    Result := FormatFloat('0.0 G', ASize / 1024 / 1024 / 1024);
-  end
-  else if (ASize > 1024 * 1024) then
-  begin
-    Result := FormatFloat('0.0 M', ASize / 1024 / 1024);
-  end
-  else if (ASize > 1024) then
-  begin
-    Result := FormatFloat('0.0 K', ASize / 1024);
-  end
-  else
-  begin
-    Result := FormatFloat('0.0 B', ASize);
-  end;
-end;
 
 procedure TfrmMain.SetUploading(const AValue: boolean);
 begin
@@ -367,6 +282,23 @@ begin
   eFileName.Enabled := not AValue;
   btnSelectFile.Enabled := not AValue;
   btnCancel.Enabled := AValue;
+end;
+
+constructor TfrmMain.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FStreamUploader := nil;
+  SetUploading(False);
+end;
+
+destructor TfrmMain.Destroy;
+begin
+  try
+    if Assigned(FStreamUploader) then
+      FreeAndNil(FStreamUploader);
+  finally
+    inherited Destroy;
+  end;
 end;
 
 end.
