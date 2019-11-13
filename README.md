@@ -5,18 +5,18 @@ A simple GUI tool that can POST huge files to http servers.
 It is a portable application that can be parametrized from the command line, and it can POST huge files to http servers.
 This tool works especially well with the dropzone-backup-server project ( see https://github.com/nagylzs/dropzone-backup-server ).
 
-The advantage of using this program is:
+Advantages:
 
-* Uses simple http or https protocol for backing up files. It can traverse multiple NATs and proxies (including most corporate proxies)
-* It is portable and does not require administrative rights.
+* Use simple http or https protocol for backing up files. 
+* Can traverse multiple NATs and proxies (including most corporate proxies)
+* Portable, single exe file without dependencies
+* Does not require administrative rights
 
 ## Screenshots
 
 ![Uploading a file](screenshots/01.png)
 
 ![Header options](screenshots/02.png)
-
-![TLS options](screenshots/03.png)
 
 ![TLS options](screenshots/03.png)
 
