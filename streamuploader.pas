@@ -18,6 +18,7 @@ type
     TotalSize: longint;
     Cancelled: boolean;
     Finished: boolean;
+    WasError : boolean;
 
     TotalElapsed: double;
     TotalUploaded: longint;
@@ -49,6 +50,8 @@ type
     FLock: TRTLCriticalSection;
     FCancelRequested: boolean;
 
+    FErrorMessage : string;
+
     function GetStatus: TStreamUploaderStatus;
     procedure OnReadProgress(Sender: TProgressFileStream; Size: longint);
     procedure SetStatus(AValue: TStreamUploaderStatus);
@@ -69,6 +72,7 @@ type
     property IOHandler: TIdSSLIOHandlerSocketOpenSSL read FIOHandler;
     property Status: TStreamUploaderStatus read GetStatus write SetStatus;
     property OnCompleted: TNotifyEvent read FOnCompleted write FOnCompleted;
+    property ErrorMessage : string read FErrorMessage;
   end;
 
 implementation
@@ -239,6 +243,7 @@ begin
 
       TotalSize := FSrc.Size;
       Cancelled := False;
+      WasError := False;
       Finished := False;
 
       TotalElapsed := 0;
@@ -264,7 +269,7 @@ begin
           with FIdHTTP.Request.CustomHeaders do
           begin
             Clear;
-            AddStrings(FHeaders);
+            AddStdValues(FHeaders);
           end;
           FIdHTTP.Post(FUrl, FForm, response);
           // Update finishing status
@@ -294,13 +299,16 @@ begin
           nextStatus.LastUploaded := FSrc.Position;
           nextStatus.Cancelled := True;
           nextStatus.Finished := False;
+          nextStatus.WasError := false;
           SetStatus(nextStatus);
           wasError := True;
         end;
         on e: Exception do
         begin
-          nextStatus.Cancelled := True;
+          nextStatus.Cancelled := False;
           nextStatus.Finished := False;
+          nextStatus.WasError := true;
+          FErrorMessage := e.Message;
           SetStatus(nextStatus);
           wasError := True;
         end;
@@ -314,6 +322,7 @@ begin
   if not wasError then
   begin
     nextStatus.Cancelled := False;
+    nextStatus.WasError := False;
     nextStatus.Finished := True;
     SetStatus(nextStatus);
     if Assigned(FOnCompleted) then

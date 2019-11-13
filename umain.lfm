@@ -127,6 +127,14 @@ object frmMain: TfrmMain
         Caption = 'Press the "Start upload" button to upload your file...'
         ParentColor = False
       end
+      object cbAutoClose: TCheckBox
+        Left = 456
+        Height = 29
+        Top = 160
+        Width = 303
+        Caption = 'Auto close program when finished'
+        TabOrder = 7
+      end
     end
     object tsHeaders: TTabSheet
       Caption = 'Headers'
@@ -175,8 +183,8 @@ object frmMain: TfrmMain
     end
     object tsTLS: TTabSheet
       Caption = 'Security'
-      ClientHeight = 249
-      ClientWidth = 1048
+      ClientHeight = 303
+      ClientWidth = 1043
       object rgTLS: TRadioGroup
         Left = 16
         Height = 158

@@ -19,6 +19,7 @@ type
     btnStartUpload: TButton;
     Button1: TButton;
     btnHelp: TButton;
+    cbAutoClose: TCheckBox;
     eFileName: TEdit;
     eURL: TEdit;
     Label1: TLabel;
@@ -111,6 +112,8 @@ begin
         2: SSLVersions := [sslvTLSv1_2, sslvTLSv1_1, sslvTLSv1];
       end;
     end;
+    FStreamUploader.Headers.Clear;
+    FStreamUploader.Headers.AddStrings(mHeaders.Lines);
     SetUploading(True);
     FStreamUploader.Start;
 
@@ -161,6 +164,13 @@ begin
       if Cancelled then
       begin
         lblProgress.Caption := 'Upload aborted.';
+        lblProgress.Font.Color := clMaroon;
+        SetUploading(False);
+        lblRemaining.Caption := '';
+      end
+      else if WasError then
+      begin
+        lblProgress.Caption := ErrorMessage;
         lblProgress.Font.Color := clRed;
         SetUploading(False);
         lblRemaining.Caption := '';
@@ -180,6 +190,9 @@ begin
         lblProgress.Font.Color := clGreen;
 
         SetUploading(False);
+
+        if cbAutoClose.Checked then
+           Application.Terminate;
       end
       else
       begin
@@ -226,6 +239,10 @@ begin
 end;
 
 procedure TfrmMain.tmStartedTimer(Sender: TObject);
+var
+  values : TStringArray;
+  index : integer;
+  value : string;
 begin
   if Visible then
   begin
@@ -253,6 +270,15 @@ begin
     begin
       mHeaders.Lines.LoadFromFile(Application.GetOptionValue('d', 'headers'));
     end;
+    if Application.HasOption('a', 'add-header') then
+    begin
+      values := Application.GetOptionValues('a', 'add-header');
+      for index := Low(values) to High(values) do
+      begin
+        value := values[index];
+        mHeaders.Lines.Add(value);
+      end;
+    end;
     if Application.HasOption('allow-tls-1.0') then
     begin
       rgTLS.ItemIndex := 2;
@@ -264,6 +290,11 @@ begin
     else
     begin
       rgTLS.ItemIndex := 0;
+    end;
+
+    if Application.HasOption('auto-close') then
+    begin
+      cbAutoClose.Checked := true;
     end;
 
     if Application.HasOption('auto-start') then

@@ -15,6 +15,7 @@ type
     btnOK: TButton;
     ListBox1: TListBox;
     Panel1: TPanel;
+    procedure ListBox1Click(Sender: TObject);
   private
 
   public
@@ -30,6 +31,11 @@ implementation
 
 { TfrmHelp }
 
+
+procedure TfrmHelp.ListBox1Click(Sender: TObject);
+begin
+
+end;
 
 end.
 
