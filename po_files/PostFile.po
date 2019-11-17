@@ -1,0 +1,51 @@
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8"
+
+#: streamuploader.snotapplicable
+msgid "N/A"
+msgstr ""
+
+#: streamuploader.sstalled
+msgid "(stalled)"
+msgstr ""
+
+#: tfrmhelp.btnok.caption
+msgid "OK"
+msgstr ""
+
+#: tfrmhelp.caption
+msgid "PostFile"
+msgstr ""
+
+#: umain.sinvalidfilename
+msgid "Invalid filename"
+msgstr ""
+
+#: umain.sinvalidurl
+msgid "Invalid URL"
+msgstr ""
+
+#: umain.spercentspeedeta
+msgid "%S %% Speed: %S ETA: %S"
+msgstr ""
+
+#: umain.spressstartupload
+msgid "Press the \"Start upload\" button to upload your file..."
+msgstr ""
+
+#: umain.spreviousuploadisstillrunning
+msgid "Previous upload is still running"
+msgstr ""
+
+#: umain.sremainingamountintime
+msgid "Remaining: %S in %S"
+msgstr ""
+
+#: umain.suploadaborted
+msgid "Upload aborted."
+msgstr ""
+
+#: umain.suploadedamountintime
+msgid "Uploaded: %S in %S"
+msgstr ""
+

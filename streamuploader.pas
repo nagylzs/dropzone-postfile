@@ -7,6 +7,10 @@ uses
   Classes, SysUtils, IdSSLOpenSSL, ProgressFileStream, IdComponent, IdHTTP,
   CustomMultiPartDataStream, DateUtils;
 
+resourcestring
+  sStalled = '(stalled)';
+  sNotApplicable = 'N/A';
+
 type
 
   { TStreamUploader }
@@ -154,7 +158,7 @@ end;
 class function TStreamUploader.FormatSpeed(const ABytesPersSec: double): string;
 begin
   if ABytesPersSec <= 0 then
-    Result := '(stalled)'
+    Result := sSTalled
   else
     Result := FormatSize(ABytesPersSec) + '/s';
 end;
@@ -166,7 +170,7 @@ var
 begin
   if (aEta <= 0) then
   begin
-    Result := 'N/A';
+    Result := sNotApplicable;
   end
   else
   begin
@@ -181,7 +185,7 @@ end;
 class function TStreamUploader.FormatRemainingTime(const aRemaining: double): string;
 begin
   if (aRemaining <= 0) then
-    Result := 'N/A'
+    Result := sNotApplicable
   else
     Result := TimeToStr(aRemaining);
 end;

@@ -1,0 +1,61 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: hu\n"
+"X-Generator: Poedit 2.2.4\n"
+
+#: streamuploader.snotapplicable
+msgid "N/A"
+msgstr "N/A"
+
+#: streamuploader.sstalled
+msgid "(stalled)"
+msgstr "(megállt)"
+
+#: tfrmhelp.btnok.caption
+msgid "OK"
+msgstr ""
+
+#: tfrmhelp.caption
+msgid "PostFile"
+msgstr ""
+
+#: umain.sinvalidfilename
+msgid "Invalid filename"
+msgstr "Érvénytelen állománynév"
+
+#: umain.sinvalidurl
+msgid "Invalid URL"
+msgstr "Érvénytelen URL"
+
+#: umain.spercentspeedeta
+msgid "%S %% Speed: %S ETA: %S"
+msgstr "%S %% Sebesség: %S ETA: %S"
+
+#: umain.spressstartupload
+msgid "Press the \"Start upload\" button to upload your file..."
+msgstr "Nyomja meg a \"Feltöltés\" gombot a file feltöltéshez..."
+
+#: umain.spreviousuploadisstillrunning
+msgid "Previous upload is still running"
+msgstr "Az előző feltöltés még fut"
+
+#: umain.sremainingamountintime
+msgid "Remaining: %S in %S"
+msgstr "Hátravan: %S idő: %S"
+
+#: umain.suploadaborted
+msgid "Upload aborted."
+msgstr "Feltöltés megszakítva."
+
+#: umain.suploadedamountintime
+msgid "Uploaded: %S in %S"
+msgstr "Feltöltve: %S idő: %S"
+

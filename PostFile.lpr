@@ -9,7 +9,8 @@ uses
   Interfaces, // this includes the LCL widgetset
   Forms, uMain, indylaz, ProgressFileStream, CustomMultiPartDataStream, uHelp,
   streamuploader
-  { you can add units after this };
+  { you can add units after this }
+  ,DefaultTranslator;
 
 {$R *.res}
 

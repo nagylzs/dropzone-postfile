@@ -9,6 +9,18 @@ uses
   ExtCtrls, IdHTTP, IdSSLOpenSSL, DateUtils, IdComponent,
   StreamUploader;
 
+resourcestring
+  sInvalidUrl = 'Invalid URL';
+  sInvalidFileName = 'Invalid filename';
+  sPreviousUploadIsStillRunning = 'Previous upload is still running';
+  sPressStartUpload = 'Press the "Start upload" button to upload your file...';
+  sUploadAborted = 'Upload aborted.';
+  //sSpeed = 'Speed';
+  //sETA = 'ETA';
+  sUploadedAmountInTime = 'Uploaded: %S in %S';
+  sRemainingAmountInTime = 'Remaining: %S in %S';
+  sPercentSpeedETA = '%S %% Speed: %S ETA: %S';
+
 type
 
   { TfrmMain }
@@ -78,13 +90,13 @@ procedure TfrmMain.btnStartUploadClick(Sender: TObject);
 begin
   if Trim(eURL.Text) = '' then
   begin
-    ShowMessage('Invalid URL');
+    ShowMessage(sInvalidUrl);
     exit;
   end;
 
   if not FileExists(eFileName.Text) then
   begin
-    ShowMessage('Invalid filename');
+    ShowMessage(sInvalidFileName);
     exit;
   end;
 
@@ -96,7 +108,7 @@ begin
     end
     else
     begin
-      ShowMessage('Previous upload is still running.');
+      ShowMessage(sPreviousUploadIsStillRunning);
       exit;
     end;
   end;
@@ -135,7 +147,7 @@ end;
 procedure TfrmMain.eFileNameChange(Sender: TObject);
 begin
   lblProgress.Font.Color := clDefault;
-  lblProgress.Caption := 'Press the "Start upload" button to upload your file...';
+  lblProgress.Caption := sPressStartUpload;
 end;
 
 procedure TfrmMain.FormCreate(Sender: TObject);
@@ -163,7 +175,7 @@ begin
     begin
       if Cancelled then
       begin
-        lblProgress.Caption := 'Upload aborted.';
+        lblProgress.Caption := sUploadAborted;
         lblProgress.Font.Color := clMaroon;
         SetUploading(False);
         lblRemaining.Caption := '';
@@ -192,26 +204,30 @@ begin
         SetUploading(False);
 
         if cbAutoClose.Checked then
-           Application.Terminate;
+          Application.Terminate;
       end
       else
       begin
         lblProgress.Caption :=
-          FormatFloat('0.0 %', PercentDone) + ' Speed: ' +
-          FormatSpeed(BatchSpeed) + ' ETA: ' + FormatEta(Eta, Started);
+          Format(sPercentSpeedETA,[
+                     FormatFloat('0.0 %', PercentDone),
+                     FormatSpeed(BatchSpeed),
+                     FormatEta(Eta, Started)
+          ]);
         lblProgress.Font.Color := clBlue;
         lblUploaded.Caption :=
-          ' Uploaded: ' + FormatSize(totalUploaded) + ' in ' + TimeToStr(totalElapsed);
+          Format(sUploadedAmountInTime, [FormatSize(totalUploaded),
+          TimeToStr(totalElapsed)]);
         lblRemaining.Caption :=
-          ' Remaining: ' + FormatSize(Remaining) + ' in ' +
-          FormatRemainingTime(RemainingTime);
+          Format(sRemainingAmountInTime, [FormatSize(Remaining),
+          FormatRemainingTime(RemainingTime)]);
       end;
       progressBar.Position := Trunc(100 * PercentDone);
     end;
   end
   else
   begin
-    lblProgress.Caption := 'Press the "Start upload" button to upload your file...';
+    lblProgress.Caption := sPressStartUpload;
     lblProgress.Font.Color := clGray;
 
     lblUploaded.Caption := '';
@@ -240,9 +256,9 @@ end;
 
 procedure TfrmMain.tmStartedTimer(Sender: TObject);
 var
-  values : TStringArray;
-  index : integer;
-  value : string;
+  values: TStringArray;
+  index: integer;
+  Value: string;
 begin
   if Visible then
   begin
@@ -275,8 +291,8 @@ begin
       values := Application.GetOptionValues('a', 'add-header');
       for index := Low(values) to High(values) do
       begin
-        value := values[index];
-        mHeaders.Lines.Add(value);
+        Value := values[index];
+        mHeaders.Lines.Add(Value);
       end;
     end;
     if Application.HasOption('allow-tls-1.0') then
@@ -294,7 +310,7 @@ begin
 
     if Application.HasOption('auto-close') then
     begin
-      cbAutoClose.Checked := true;
+      cbAutoClose.Checked := True;
     end;
 
     if Application.HasOption('auto-start') then
